@@ -55,16 +55,14 @@ def convert_int_tensor_to_tileset(
             if fingerprint not in tile_pixels_map:
                 tile_pixels_map[fingerprint] = tile_pixels
 
-    tiles = set(
-        Tile(
+    tileset = {
+        i: Tile(
             uid=i,
             pixels=tile_pixels_map[fingerprint],
             frequency=tile_count[fingerprint] / n_pixels,
         )
         for i, fingerprint in enumerate(tile_fingerprints)
-    )
-
-    tileset = {tile.uid: tile for tile in tiles}
+    }
 
     log.info("Number of pixels: %s", n_pixels)
     log.info("Number of tiles: %s", len(tileset))
