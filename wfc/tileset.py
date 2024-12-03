@@ -1,11 +1,26 @@
-from pathlib import Path
+from dataclasses import dataclass
 
 import numpy as np
 import structlog
 
-from wfc.models.tileset import Tile, Tileset
-
 log = structlog.get_logger()
+
+
+@dataclass(frozen=True)
+class Tile:
+    uid: int
+    pixels: np.ndarray
+    frequency: float
+
+    @property
+    def size(self) -> int:
+        return self.pixels.shape[0]
+
+    def __hash__(self):
+        return hash(self.uid)
+
+
+Tileset = dict[int, Tile]
 
 
 def convert_int_tensor_to_tileset(
@@ -49,15 +64,10 @@ def convert_int_tensor_to_tileset(
         for i, fingerprint in enumerate(tile_fingerprints)
     )
 
-    tileset = Tileset(
-        tile_size=tile_size,
-        tiles={tile.uid: tile for tile in tiles},
-        color_pallet=color_pallet,
-    )
+    tileset = {tile.uid: tile for tile in tiles}
 
     log.info("Number of pixels: %s", n_pixels)
-    log.info("Number of tiles: %s", tileset.n_tiles)
-    log.info("Unique colors: %s", color_pallet)
-    log.info("Number of unique colors: %s", tileset.n_colors)
+    log.info("Number of tiles: %s", len(tileset))
+    log.info("Unique colors (%s): %s", len(color_pallet), color_pallet)
 
     return tileset
